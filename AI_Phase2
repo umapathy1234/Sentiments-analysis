@@ -1,0 +1,124 @@
+# SENTIMENTAL ANALYSIS FOR MARKETING
+
+# PHASE 2: INNOVATION
+
+*1. * *Problem Definition and Scope Refinement:*
+   - Clearly define the problem your sentiment analysis aims to solve in marketing. Refine the scope to focus on specific aspects like customer feedback analysis, brand sentiment tracking, or product perception assessment.
+
+
+*2. * *Advanced Natural Language Processing (NLP):*
+   - Utilize state-of-the-art NLP techniques such as transformer models (like BERT, GPT) for understanding context and nuances in textual data. These models can capture intricate sentiments and improve accuracy.  
+
+*3. * *Customizable Sentiment Analysis Toolkit:*
+   - Develop a modular and customizable toolkit that marketers can easily adapt to their specific needs. Include features for sentiment polarity analysis, entity recognition, and theme categorization.
+ 
+*4. * *Real-time Data Processing:*
+   - Implement real-time data processing capabilities to analyze live social media feeds, customer reviews, and other textual data sources. This ensures timely insights for immediate marketing actions.  
+
+*5. * *Multimodal Analysis Integration:*
+   - Integrate multimodal analysis, combining textual data with images and videos. This holistic approach provides a comprehensive view of customer sentiment, especially in visual-centric platforms like Instagram and YouTube.  
+
+*6. * *Explainable AI (XAI) for Interpretability:*
+   - Incorporate explainable AI techniques to make the sentiment analysis results interpretable. Marketers should understand why a certain sentiment was predicted, enabling them to trust and act upon the insights provided.
+
+*7. * *Sentiment Trend Prediction:*
+   - Implement machine learning algorithms to predict sentiment trends based on historical data. This forecasting feature helps marketers anticipate shifts in customer sentiment and plan marketing strategies proactively.
+ 
+*8. * *User-Friendly Dashboard:*
+   - Design an intuitive and user-friendly dashboard where marketers can visualize sentiment analysis results. Include interactive charts, sentiment heatmaps, and customizable filters to explore data effectively.
+ 
+*9. * *Collaborative Feedback Loop:*
+   - Enable a feedback loop where marketers can provide input on sentiment analysis results. This collaboration ensures that the system learns from user feedback, improving its accuracy over time.
+ 
+
+*10. * *Integration with Marketing Tools:*
+    - Integrate the sentiment analysis solution with popular marketing tools and platforms (such as CRM systems, social media management tools). This seamless integration empowers marketers to directly implement strategies based on sentiment insights.  
+
+*11. * *Data Security and Compliance:*
+    - Prioritize data security and compliance with regulations like GDPR. Implement encryption, access controls, and anonymization techniques to protect sensitive customer data.
+ 
+*12. * *Design and implementation:*
+There are four main modules naming, crawler, sentiment analysis tool, data mining module and dashboard in this project. The top level architectural diagram of the system as follows.  
+ 
+ 
+Fig 1: Top level architectural diagram of the system 
+
+ #Naive bayes classifier
+ The Bayesian classification is used as a probabilistic learning method. In naive Bayes classifiers, every feature gets a say in determining which label should be assigned to a given input value. To choose a label for an input value, the naive Bayes classifier begins by calculating the prior probability of each label, which is determined by checking frequency of each label in the training set. The contribution from each feature is then combined with this prior probability, to arrive at a likelihood estimate for each label. The label whose likelihood estimate is the highest is then assigned to the input value.  
+Following equations are used in calculating label likelihoods as shown in the following figure,
+
+P(label|features) = P(features, label) / P(features) 
+ 	 	= P(label) × P(features|label) ) / P(features) 
+ 	 	= P(label) × Prodf in| featuresP(f|label)` / P(features) 
+ 	(Since features are independent) 
+ 
+ 
+Fig 3: Calculating label likelihoods with Naive Bayes 
+In this classification method, the naïve Bayes assumption or independence assumption which is independence of the features makes it easy to combine the contributions of different features since it need not worry about how they should interact with one another.  
+#maximum entropy classifier
+ This classifier uses a model similar to naïve Bayes classifier, except it uses search techniques to find set of parameters to maximize the performance of the classifier rather than using probabilities to set model’s parameters. Because of the potentially complex interactions between the effects of related features, there is no way to directly calculate the model parameters that maximize the likelihood of the training set. Therefore, Maximum Entropy classifiers choose the model parameters using iterative optimization techniques, which initialize the model's parameters to random values, and then repeatedly refine those parameters to bring them closer to the optimal solution [9]. 
+ A  Technique using SentiWordNet 
+To implement this approach, it used set of labeled text corpus and SentiWordNet lexical data source which contains negative and positive scores for each word it contains. The following algorithm explains how we can analyze sentiments using the labeled corpus and the SentiWordNet. Here first it was needed to put the words of labeled corpus into two different bags called positive bag of words and negative bag of words based on the frequencies of each word. 
+pos = neg = 0 
+FOR sentence IN sentence_list :  sent_score_pos = sent_score_neg = 0  FOR word IN sentence: best_sense = Disambiguate Word Senses (sentence, word) 
+
+IF bag_of_words['neg'].has_key(word): sent_score_neg += SentiWordNet[best_sense]['neg']         IF bag_of_words['pos'].has_key(word):              sent_score_pos += SentiWordNet [best_sense]['pos']         pos += sent_score_pos         neg += sent_score_neg 
+  RETURN pos, neg 
+ 
+ After training and testing these three methods with a labeled twitter corpus, we selected the Naïve Bayes classifier for sentiment analysis since it’s faster and at the same time it gives little more accuracy than Maximum Entropy classifier and much more accuracy than the technique using SentiWordNet. The evaluation results of the two classifiers are stated in the evaluation section at the end. 
+ Finally, as the solution to the problem of identifying ambiguous words in different contexts, we implemented word sense disambiguation to get the correct user sentiments with the intended sense. For this also we used Naïve Bayes classification method to classify a given set of ambiguous sentiments. For example, it requires disambiguating the sentiments of the product “Apple” from the fruit “Apple”. Here, to correctly identify these two, it needs to do word sense disambiguation. 
+ After implementing the sentiment analysis tool as mentioned above, we were able to overcome most problems that were encountered at the beginning of this approach. Then we were able to start the final part of the project that is implementing data mining module which uses the analyzed sentiment scores to product profiling and forecasting. 
+
+#data mining
+ When implementing the product profiling, it uses the decision tree after comparing it with the clustering technique and for the trend analysis and forecasting it used Holt Winters method which is capable of analyzing seasonal data and predict proper values for the future. The following figures show how these product profiling, trend analysis and forecasting works in this system.  
+ 
+ 
+ 
+
+ 
+ 
+
+
+
+
+ 
+#evaluation
+Here we give priority to evaluate the classifiers in order to select the most probable classifier to use in the project Sentiment Analysis for Social Media. This evaluation was an effective tool to guide us to make improvements to the selected model also. 
+ To evaluate these two classifiers, we needed a large labeled text corpus. Since it could find a very large corpus, it trained the classifiers on large set of training data and tested on increasing amount of test data. Prior to state the evaluation results of the classifiers, it needs to present evaluation results of feature extraction methods because it is the major thing that affects to the accuracy of the classifiers. The evaluation results of the feature extraction methods as well as the classifiers with selected feature extraction method are as follows. 
+TABLE 1 
+EVALUATION OF DIFFERENT FEATURE EXTRACION METHODS 
+Feature 
+Extraction 
+Method 	Accura cy 	Positiv e Precisi on 	Positive Recall 	Negati ve Precisi on 	Negati ve Recall 
+Unigrams 	0.7483 	0.8058 	0.6543 	0.7090 	0.8424 
+Unigrams except 	Stop Words 	0.7436 	0.7605 	0.7112 	0.7288 	0.7761 
+Bigram 
+Collocation 	0.7630 	0.8143 	0.6814 	0.7261 	0.8447 
+Most 
+Informative 
+Unigrams 	0.7778 	0. 8581 	0.6658 	0.7269 	0.8899 
+Most 
+Informative 
+Unigrams and Bigram 
+Collocations.  	0.7785 	0.8350 	0.6881 	0.7347 	0.8641 
+ 
+TABLE 2 DIFFERENT EVALUATION METHODS 
+Evaluation Method 	Classifier 	Training Set Size 	Test 	Set 
+Size 
+1 	Naïve Bayes 	70000 	10000 
+2 	Naïve Bayes 	70000 	20000 
+3 	Naïve Bayes 	70000 	30000 
+4 	Maximum Entropy 	70000 	10000 
+5 	Maximum Entropy 	70000 	20000 
+6 	Maximum Entropy 	70000 	30000 
+ 
+TABLE 3 
+EVALUATION RESULTS FOR ABOVE EVALUATION METHODS 
+Evaluati on 
+Method 	Accura cy 	Positive Precision 	Positive Recall 	Negative Precisio n 	Negative Recall 
+1 	0.7751 	0.8357 	0.6848 	0.7330 	0.8654 
+2 	0.7758 	0.8336 	0.6891 	0.7350 	0.8625 
+3 	0.7806 	0.8388 	0.6946 	0.7394 	0.8666 
+4 	0.7730 	0.8373 	0.6780 	0.7294 	0.8680 
+5 	0.7765 	0.8388 	0.6846 	0.7335 	0.8685 
+6 	0.7799 	0.8422 	0.6889 	0.7368 	0.8710

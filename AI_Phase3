@@ -1,0 +1,197 @@
+SENTIMENTAL ANALYSIS FOR MARKETING
+
+            PHASE 3-DEVELOPMENT PART 1
+
+       TOPIC- LOADING AND PREPROCESSING THE DATASET
+
+                                                               
+                      
+
+ 
+   
+
+                                                                                                                                                      
+	INTRODUCTION
+
+->Now days sentiments are very important for marketing in our era. So before going to deal with the data sets we need preprocess the datasets.
+->This introduction will guide you through the initial steps of the process. We'll explore how to import essential libraries, load the tweets dataset, and perform critical preprocessing steps. Data preprocessing is crucial as it helps clean, format, and prepare the data for further analysis. This includes handling missing values, encoding categorical variables, and ensuring that the data is appropriately scaled.
+
+
+
+
+	LINK FOR CSV(EXCEL) FILE DATASET WITH THE SENTIMENTS
+
+	https://1drv.ms/x/c/712566b6b0323060/EcAfxCzv_NdNr0WF0FdNGlQB5AV1NXYGfHRS21sJPJtiEg?e=dIa3o2
+
+	SOURCE CODE TO INPUT THE DATASET FOR ANALYSIS
+
+input/Tweets.csv:
+	mkdir -p input
+	curl http://cdn2.hubspot.net/hub/346378/file-2545951097-csv/DFE_CSVs/Airline-Sentiment-2-w-AA.csv -o input/Tweets.csv
+input: input/Tweets.csv
+
+output/Tweets.csv: input/Tweets.csv
+	mkdir -p working
+	mkdir -p output
+	python src/process.py
+csv: output/Tweets.csv
+
+working/noHeader/Tweets.csv: output/Tweets.csv
+	mkdir -p working/noHeader
+	tail +2 $^ > $@
+
+output/database.sqlite: working/noHeader/Tweets.csv
+	-rm output/database.sqlite
+	sqlite3 -echo $@ < working/import.sql
+db: output/database.sqlite
+
+output/hashes.txt: output/database.sqlite
+	-rm output/hashes.txt
+	echo "Current git commit:" >> output/hashes.txt
+	git rev-parse HEAD >> output/hashes.txt
+	echo "\nCurrent input/ouput md5 hashes:" >> output/hashes.txt
+	md5 output/*.csv >> output/hashes.txt
+	md5 output/*.sqlite >> output/hashes.txt
+	md5 input/*.csv >> output/hashes.txt
+hashes: output/hashes.txt
+
+release: output/database.sqlite output/hashes.txt
+	zip -r -X output/airline-twitter-sentiment-release-`date -u +'%Y-%m-%d-%H-%M-%S'` output/*
+all: csv db hashes release
+clean:
+	rm -rf working
+	rm -rf output
+
+                          DATASET DEMO FROM THE LINK PROVIDED ABOVE
+ 
+	SOURCE CODE TO PROCESS THE DATASET FOR ANALYSIS
+import pandas as pd
+
+data = pd.read_csv("input/Tweets.csv")
+data.columns = [col.replace(":", "_") for col in data.columns]
+
+columns_to_keep = ["tweet_id"] + [col for col in data.columns if col[0]!="_" and col!="tweet_id"]
+
+data = data[columns_to_keep]
+
+conversion = {
+    "object": "TEXT",
+    "float64": "NUMERIC",
+    "int64": "INTEGER"
+}
+
+sql = """.separator ","
+CREATE TABLE Tweets (
+%s);
+.import "working/noHeader/Tweets.csv" Tweets
+""" % ",\n".join(["    %s %s%s" % (key,
+                                   conversion[str(data.dtypes[key])],
+                                   " PRIMARY KEY" if key=="tweet_id" else "")
+                  for key in data.dtypes.keys()])
+
+data.to_csv("output/Tweets.csv", index=False)
+
+open("working/import.sql", "w").write(sql)
+                 
+                            
+
+
+
+
+NECESSARY STEPS TO FOLLOW:-
+
+1.	IMPORT LIBRARIES:
+Start by importing the necessary libraries:
+PROGRAM
+import pandas as pd import numpy as np
+from sklearn.model_selection import train_test_split from sklearn.preprocessing import StandardScaler
+2.LOAD THE DATASET
+Load your dataset into a Pandas DataFrame. You can typically find house price datasets in CSV format, but you can adapt this code to other formats as needed.
+tweets=pd.read_csv(‘tweetscsv.csv’)
+
+	EXPLORATORY ANALYSIS
+To begin this exploratory analysis, first use matplotlib to import libraries and define functions for plotting the data. Depending on the data, not all plots will be made. (Hey, I'm just a kerneling bot, not a Kaggle Competitions Grandmaster!)
+
+
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt # plotting
+import numpy as np # linear algebra
+import os # accessing directory structure
+import pandas as pd # data processing
+pd.read()
+
+4.FEATURE ENGINEERING:
+Depending on your dataset, you may need to create new features or transform existing ones. This can involve one-hot encoding categorical variables, handling date/time data, or scaling numerical features.
+PROGRAM:
+# Example: One-hot encoding for categorical variables
+df = pd.get_dummies(df, columns=[' Avg. Area Income ', ' Avg. Area House Age '])
+5. SPILT THE DATA:
+Split your dataset into training and testing sets. This helps you evaluate your model's performance later. X = df.drop('price', axis=1) # Features y = df['price'] # Target variable
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+6.FEATURE SCALING:
+Apply feature scaling to normalize your data, ensuring that all features have similar scales. Standardization (scaling to mean=0 and std=1) is a common choice.
+PROGRAM:
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+IMPORTANCE OF LOADING AND PREPROCESSING DATA:
+Loading and preprocessing the dataset is an important first step in building any machine learning model. However, it is especially important for house price prediction models, as house price datasets are often complex and noisy.
+By loading and preprocessing the dataset, we can ensure that the machine learning algorithm is able to learn from the data effectively and accurately.
+CHALLENGES INVOLVED
+There are a number of challenges involved in loading and preprocessing a house price dataset, including:
+	HANDLING MISSING VALUES
+House price datasets often contain missing values, which can be due to a variety of factors, such as human error or incomplete data collection. Common methods for handling missing values include dropping the rows with missing values, imputing the missing values with the mean or median of the feature, or using a more sophisticated method such as multiple imputation.
+	ENCODING CATEGORICAL VARIABLES
+House price datasets often contain categorical features, such as the type of house, the neighbourhood, and the school district. These features need to be encoded before they can be used by machine learning models. One common way to encode categorical variables is to use one-hot encoding.
+	SCALING THE FEATURES:
+It is often helpful to scale the features before training a machine learning model. This can help to improve the performance of the model and make it more robust to outliers. There are a variety of ways to scale the features, such as min-max scaling and standard scaling.
+	SPLITTING THE DATASET INTO TRAINING AND TESTING SETS:
+Once the data has been pre-processed, we need to split the dataset into training and testing sets. The training set will be used to train the model, and the testing set will be used to evaluate the performance of the model on unseen data. It is important to split the dataset in a way that is representative of the real world distribution of the data.
+HOW TO OVERCOME THE CHALLENGES
+There are a number of things that can be done to overcome the challenges of loading and preprocessing a house price dataset, including:
+	USE A DATA PREPROCESSING LIBRARY
+There are a number of libraries available that can help with data preprocessing tasks, such as handling missing values, encoding categorical variables, and scaling the features.
+	CAREFULLY CONSIDER THE NEEDS FOR YOUR DATA
+The best way to preprocess the data will depend on the specific machine learning algorithm that you are using. It is important to carefully consider the requirements of the algorithm and to preprocess the data in a way that is compatible with the algorithm.
+	VALIDATE THE PREPROCESSED DATA:
+It is important to validate the pre processed data to ensure that it is in a format that can be used by the machine learning algorithm and that it is of high quality. This can be done by inspecting the data visually or by using statistical methods.
+
+
+1.LOADING THE DATASET:
+	Loading the dataset using machine learning is the process of bringing the data into the machine learning environment so that it can be used to train and evaluate a model.
+	The specific steps involved in loading the dataset will vary depending on the machine learning library or framework that is being used. However, there are some general steps that are common to most machine learning frameworks:
+A.	IDENTIFY THE DATA SET:
+The first step is to identify the dataset that you want to load. This dataset may be stored in a local file, in a database, or in a cloud storage service.
+B.	LOAD THE DATASET:
+Once you have identified the dataset, you need to load it into the machine learning environment. This may involve using a built-in function in the machine learning library, or it may involve writing your own code.
+C.	PREPROCESS THE DATA SET :
+Once the dataset is loaded into the machine learning environment, you may need to preprocess it before you can start training and evaluating your model. This may involve cleaning the data, transforming the data into a suitable format, and splitting the data into training and test sets.
+
+
+
+
+
+
+PROGRAM
+Import pandas as pd
+Import numpy as np
+Import seaborn as sns
+import matplotlib.pyplot as plt from sklearn.model_selection import train_test_split from sklearn.preprocessing import StandardScaler
+
+from sklearn.svm import SVR
+
+import xgboost as xg
+
+warnings.filterwarnings(‘ignore’) 
+from sklearn.metrics import r2_score, mean_absolute_error,mean_squared_error from sklearn.linear_model import LinearRegression from sklearn.linear_model import Lasso from sklearn.ensemble import RandomForestRegressor
+
+ 
+
+
+  
+CONCLUSION:
+In the quest to build a house price prediction model, we have embarked on a critical journey that begins with loading and preprocessing the dataset. We have traversed through essential steps, starting with importing the necessary libraries to facilitate data manipulation and analysis. 
+Understanding the data's structure, characteristics, and any potential issues through exploratory data analysis (EDA) is essential for informed decision-making. 
+Data preprocessing emerged as a pivotal aspect of this process. It involves cleaning, transforming, and refining the dataset to ensure that it aligns with the requirements of machine learning algorithms. 
+ With these foundational steps completed, our dataset is now primed for the subsequent stages of building and training a house price prediction model.
